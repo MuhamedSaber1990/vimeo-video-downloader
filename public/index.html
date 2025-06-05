@@ -3,422 +3,425 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🎥 Vimeo Downloader</title>
+    <title>Vimeo Video Downloader</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+      :root {
+        --primary: #1ab7ea;
+        --primary-dark: #0d9bc5;
+        --secondary: #ddd;
+        --light: #f5f5f5;
+        --dark: #121212;
+        --darker: #0a0a0a;
+        --success: #4caf50;
+        --error: #f44336;
+        --card-bg: rgba(30, 30, 40, 0.7);
+        --card-border: rgba(255, 255, 255, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
       body {
-        font-family: Arial, sans-serif;
-        margin: 24px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+        color: var(--light);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
 
-      .header h1 {
-        margin-bottom: 4px;
-        font-size: 28px;
-      }
-      .header p {
-        margin-top: 0;
-        color: #666;
+      .container {
+        background: rgba(10, 10, 15, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        padding: 30px;
+        width: 100%;
+        max-width: 800px;
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--card-border);
       }
 
-      .form-group {
-        margin-bottom: 12px;
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
+
+      h1 {
+        font-size: 2.8rem;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, var(--primary), #ffffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        color: #bbb;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid var(--card-border);
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
       label {
         display: block;
-        font-weight: bold;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #ddd;
+        font-size: 1.1rem;
       }
-      input.form-control {
+
+      input {
         width: 100%;
-        box-sizing: border-box;
-        padding: 8px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        background: rgba(20, 20, 30, 0.9);
+        color: white;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(26, 183, 234, 0.3);
       }
 
       .btn {
-        background-color: #3b82f6;
+        background: var(--primary);
         color: white;
         border: none;
-        padding: 10px 16px;
-        font-size: 16px;
-        border-radius: 4px;
+        padding: 16px 28px;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 10px;
         cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(26, 183, 234, 0.3);
       }
+
+      .btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(26, 183, 234, 0.4);
+      }
+
       .btn:disabled {
-        background-color: #9ec5fe;
+        background: #555;
         cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        opacity: 0.7;
+      }
+
+      .btn-full {
+        width: 100%;
       }
 
       .progress-container {
+        margin: 30px 0;
         display: none;
-        margin-top: 16px;
       }
-      .progress-text {
-        margin-bottom: 6px;
-        font-size: 14px;
-        color: #333;
-      }
+
       .progress-bar {
-        position: relative;
-        height: 24px;
-        background: #eee;
-        border-radius: 12px;
+        height: 14px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 7px;
         overflow: hidden;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
       }
+
       .progress-fill {
         height: 100%;
+        background: linear-gradient(90deg, var(--primary), #4db6e8);
+        border-radius: 7px;
         width: 0%;
-        background: #4caf50;
-        transition: width 0.2s ease;
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px rgba(77, 182, 232, 0.5);
       }
 
-      .status-message {
+      .progress-text {
+        text-align: center;
+        margin-top: 12px;
+        font-size: 16px;
+        color: #bbb;
+        font-weight: 500;
+      }
+
+      .status {
+        padding: 18px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+        font-weight: 500;
         display: none;
-        padding: 8px;
-        margin-top: 16px;
-        border-radius: 4px;
-        font-size: 14px;
-      }
-      .status-success {
-        background: #e0f8e9;
-        color: #276738;
-      }
-      .status-error {
-        background: #fde2e1;
-        color: #912a2b;
-      }
-      .status-info {
-        background: #e1f0fd;
-        color: #1b4f9a;
+        font-size: 16px;
       }
 
-      .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(0, 0, 0, 0.2);
-        border-top-color: rgba(0, 0, 0, 0.6);
-        border-radius: 50%;
-        display: inline-block;
-        animation: spin 0.6s linear infinite;
-        vertical-align: middle;
-        margin-right: 6px;
+      .status.success {
+        background: rgba(76, 175, 80, 0.2);
+        border: 1px solid var(--success);
+        color: #a5d6a7;
+        display: block;
       }
+
+      .status.error {
+        background: rgba(244, 67, 54, 0.2);
+        border: 1px solid var(--error);
+        color: #ef9a9a;
+        display: block;
+      }
+
+      .status.info {
+        background: rgba(26, 183, 234, 0.2);
+        border: 1px solid var(--primary);
+        color: #81d4fa;
+        display: block;
+      }
+
+      .loader {
+        display: inline-block;
+        width: 26px;
+        height: 26px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+      }
+
       @keyframes spin {
         to {
           transform: rotate(360deg);
         }
       }
 
-      .video-info {
-        display: none;
-        margin-top: 24px;
-        border-top: 1px solid #ddd;
-        padding-top: 16px;
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        color: #777;
+        font-size: 15px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
-      .video-info h3 {
-        margin-bottom: 8px;
-        font-size: 18px;
-      }
-      .info-item {
-        margin-bottom: 6px;
-      }
-      .info-label {
-        font-weight: bold;
-        color: #444;
-      }
-      .info-value {
-        margin-left: 6px;
-        color: #222;
+
+      @media (max-width: 650px) {
+        .container {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 2.2rem;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1>🎥 Vimeo Downloader</h1>
-      <p>Download private Vimeo videos with ease</p>
-    </div>
+    <div class="container">
+      <header>
+        <h1>Vimeo Video Downloader</h1>
+        <p class="subtitle">
+          Enter a Vimeo video URL and download it directly to your Google Drive
+        </p>
+      </header>
 
-    <!-- Connect to Google Drive button -->
-    <a href="/auth/google/login" class="btn" style="margin-bottom: 16px">
-      Connect to Google Drive
-    </a>
-
-    <form id="downloadForm">
-      <div class="form-group">
-        <label for="vimeoUrl">Vimeo Video URL</label>
-        <input
-          type="url"
-          id="vimeoUrl"
-          class="form-control"
-          placeholder="https://player.vimeo.com/video/123456789"
-          required
-        />
+      <!-- Connect to Google Drive -->
+      <div class="card">
+        <a href="/auth/google/login" class="btn btn-full">
+          Connect to Google Drive
+        </a>
       </div>
 
-      <div class="form-group">
-        <label for="filename">Custom Filename</label>
-        <input
-          type="text"
-          id="filename"
-          class="form-control"
-          placeholder="my-video"
-        />
+      <!-- Download Form -->
+      <div class="card">
+        <div class="input-group">
+          <label for="vimeoUrl">Vimeo Video URL</label>
+          <input
+            type="text"
+            id="vimeoUrl"
+            placeholder="https://vimeo.com/123456789"
+            autocomplete="off"
+          />
+        </div>
+        <button id="downloadBtn" class="btn btn-full">
+          <span id="downloadBtnText">Download Video</span>
+        </button>
+
+        <div id="status" class="status info" style="display: none"></div>
       </div>
 
-      <button type="submit" class="btn" id="downloadBtn">
-        <span id="btnText">Download Video</span>
-      </button>
-    </form>
+      <!-- Progress -->
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div id="progressText" class="progress-text">0%</div>
+      </div>
 
-    <div class="progress-container" id="progressContainer">
-      <div class="progress-text" id="progressText">Preparing download…</div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </div>
-
-    <div class="status-message" id="statusMessage"></div>
-
-    <div class="video-info" id="videoInfo">
-      <h3>Video Information</h3>
-      <div class="info-item">
-        <span class="info-label">Title:</span>
-        <span class="info-value" id="videoTitle">-</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Duration:</span>
-        <span class="info-value" id="videoDuration">-</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Resolution:</span>
-        <span class="info-value" id="videoResolution">-</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Owner:</span>
-        <span class="info-value" id="videoOwner">-</span>
-      </div>
+      <footer>
+        <p>
+          Only download videos you have permission to access. Respect copyright
+          laws and Vimeo’s Terms of Service.
+        </p>
+        <p>Educational purposes only | Built with Node.js & FFmpeg</p>
+      </footer>
     </div>
 
     <script>
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 1) On page load, request Notification permission
-      // ───────────────────────────────────────────────────────────────────────────────
       document.addEventListener("DOMContentLoaded", () => {
-        if ("Notification" in window && Notification.permission === "default") {
-          Notification.requestPermission();
+        const vimeoUrlInput = document.getElementById("vimeoUrl");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const downloadBtnText = document.getElementById("downloadBtnText");
+        const statusDiv = document.getElementById("status");
+        const progressContainer = document.getElementById("progressContainer");
+        const progressFill = document.getElementById("progressFill");
+        const progressText = document.getElementById("progressText");
+
+        let ws = null;
+
+        function showStatus(message, type) {
+          statusDiv.textContent = message;
+          statusDiv.className = `status ${type}`;
+          statusDiv.style.display = "block";
         }
-      });
 
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 2) Grab all DOM references
-      // ───────────────────────────────────────────────────────────────────────────────
-      const form = document.getElementById("downloadForm");
-      const downloadBtn = document.getElementById("downloadBtn");
-      const btnText = document.getElementById("btnText");
-      const progressContainer = document.getElementById("progressContainer");
-      const progressFill = document.getElementById("progressFill");
-      const progressText = document.getElementById("progressText");
-      const statusMessage = document.getElementById("statusMessage");
-      const videoInfo = document.getElementById("videoInfo");
-      const videoTitle = document.getElementById("videoTitle");
-      const videoDuration = document.getElementById("videoDuration");
-      const videoResolution = document.getElementById("videoResolution");
-      const videoOwner = document.getElementById("videoOwner");
-      const vimeoUrlInput = document.getElementById("vimeoUrl");
-      const filenameInput = document.getElementById("filename");
+        function hideStatus() {
+          statusDiv.style.display = "none";
+        }
 
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 3) WebSocket logic (dynamic URL + debug logs)
-      // ───────────────────────────────────────────────────────────────────────────────
-      let ws = null;
+        function connectWebSocket() {
+          const wsUrl = `ws://${location.host}`;
+          console.log("▶️ Connecting to WebSocket at", wsUrl);
+          ws = new WebSocket(wsUrl);
 
-      function connectWebSocket() {
-        const wsUrl = `ws://${location.host}`;
-        console.log("▶️ Attempting WebSocket connection to:", wsUrl);
-        ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-          console.log("✅ WebSocket connected.");
-        };
-        ws.onerror = (err) => {
-          console.error("❌ WebSocket error:", err);
-        };
-        ws.onclose = () => {
-          console.warn("⚠️ WebSocket closed. Will retry in 3s…");
-          setTimeout(connectWebSocket, 3000);
-        };
-
-        ws.onmessage = (event) => {
-          try {
+          ws.onopen = () => {
+            console.log("✅ WebSocket connected.");
+          };
+          ws.onclose = () => {
+            console.warn("⚠️ WebSocket closed, retrying in 3s…");
+            setTimeout(connectWebSocket, 3000);
+          };
+          ws.onerror = (err) => {
+            console.error("❌ WebSocket error:", err);
+          };
+          ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log("📩 Received via WS:", data);
+            console.log("📩 WS message:", data);
             handleProgressUpdate(data);
-          } catch (e) {
-            console.error("⚠️ Could not parse WebSocket message:", e);
-          }
-        };
-      }
+          };
+        }
 
-      // Immediately attempt to connect on page load
-      connectWebSocket();
-
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 4) Handle incoming “progress” / “complete” / “error” / “gdrive_upload_complete”
-      // ───────────────────────────────────────────────────────────────────────────────
-      function handleProgressUpdate(data) {
-        switch (data.type) {
-          case "progress":
-            updateProgress(
-              data.percentage,
-              data.status,
-              data.duration,
-              data.size
-            );
-            if (data.videoTitle) {
-              showVideoInfo(
-                data.videoTitle,
-                data.duration,
-                data.resolution,
-                data.owner
+        function handleProgressUpdate(data) {
+          switch (data.type) {
+            case "progress":
+              updateProgress(data.percentage, data.status);
+              break;
+            case "complete":
+              showStatus(
+                "🎉 Download complete. Now uploading to Google Drive…",
+                "info"
               );
-            }
-            break;
-
-          case "complete":
-            showStatus("🎉 Download completed successfully!", "success");
-            if (
-              "Notification" in window &&
-              Notification.permission === "granted"
-            ) {
-              new Notification("Download Complete", {
-                body: "Your Vimeo video has finished downloading.",
-              });
-            }
-            resetForm();
-            break;
-
-          case "error":
-            showStatus("❌ Download failed: " + data.message, "error");
-            resetForm();
-            break;
-
-          case "gdrive_upload_complete":
-            showStatus("✔︎ Uploaded to Google Drive: " + data.file, "success");
-            if (
-              "Notification" in window &&
-              Notification.permission === "granted"
-            ) {
-              new Notification("Upload Complete", {
-                body: `“${data.file}” is now in your Google Drive.`,
-              });
-            }
-            break;
-
-          default:
-            console.warn("ℹ️ Unknown message type from WS:", data.type);
-        }
-      }
-
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 5) Update progress bar + text
-      // ───────────────────────────────────────────────────────────────────────────────
-      function updateProgress(percentage, status, duration, size) {
-        progressFill.style.width = `${percentage}%`;
-        progressText.textContent = `${status} – ${percentage}% | Duration: ${
-          duration || "N/A"
-        } | Size: ${size || "N/A"}`;
-      }
-
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 6) Show video metadata (if server sends it)
-      // ───────────────────────────────────────────────────────────────────────────────
-      function showVideoInfo(title, duration, resolution, owner) {
-        videoTitle.textContent = title || "-";
-        videoDuration.textContent = duration || "-";
-        videoResolution.textContent = resolution || "-";
-        videoOwner.textContent = owner || "-";
-        videoInfo.style.display = "block";
-      }
-
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 7) Show an in-page status message (success / error / info)
-      // ───────────────────────────────────────────────────────────────────────────────
-      function showStatus(message, type) {
-        statusMessage.textContent = message;
-        statusMessage.className = `status-message status-${type}`;
-        statusMessage.style.display = "block";
-        setTimeout(() => {
-          statusMessage.style.display = "none";
-        }, 5000);
-      }
-
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 8) Reset form & progress UI
-      // ───────────────────────────────────────────────────────────────────────────────
-      function resetForm() {
-        downloadBtn.disabled = false;
-        btnText.innerHTML = "Download Video";
-        progressContainer.style.display = "none";
-        progressFill.style.width = "0%";
-      }
-
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 9) Form submission: POST to /api/download + show “Waiting…” immediately
-      // ───────────────────────────────────────────────────────────────────────────────
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const vimeoUrl = vimeoUrlInput.value.trim();
-        const filename = filenameInput.value.trim();
-
-        if (!vimeoUrl) {
-          showStatus("⚠️ Please enter a valid Vimeo URL", "error");
-          return;
-        }
-
-        downloadBtn.disabled = true;
-        btnText.innerHTML = '<span class="spinner"></span>Starting…';
-        progressContainer.style.display = "block";
-        progressText.textContent = "⏳ Waiting for progress…";
-        statusMessage.style.display = "none";
-
-        try {
-          const response = await fetch("/api/download", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ vimeoUrl, filename }),
-          });
-          const result = await response.json();
-          if (!response.ok) {
-            throw new Error(result.error || "Download initialization failed");
+              break;
+            case "error":
+              showStatus("❌ Error: " + data.message, "error");
+              resetUI();
+              break;
+            case "gdrive_upload_complete":
+              showStatus(
+                "✔︎ Uploaded to Google Drive: " + data.file,
+                "success"
+              );
+              resetUI();
+              break;
+            default:
+              console.warn("ℹ️ Unknown WS message type:", data.type);
           }
-          showStatus("🟢 Download started…", "info");
+        }
 
-          // If WebSocket is closed, reconnect
-          if (!ws || ws.readyState === WebSocket.CLOSED) {
-            connectWebSocket();
+        function updateProgress(percent, status) {
+          progressContainer.style.display = "block";
+          progressFill.style.width = `${percent}%`;
+          progressText.textContent = `${status} – ${percent}%`;
+        }
+
+        function resetUI() {
+          downloadBtn.disabled = false;
+          downloadBtnText.innerHTML = "Download Video";
+          progressContainer.style.display = "none";
+          progressFill.style.width = "0%";
+          hideStatus();
+        }
+
+        downloadBtn.addEventListener("click", async () => {
+          const vimeoUrl = vimeoUrlInput.value.trim();
+          if (!vimeoUrl) {
+            showStatus("⚠️ Please enter a valid Vimeo URL", "error");
+            return;
           }
-        } catch (err) {
-          console.error("🔴 Error in /api/download call:", err);
-          showStatus("❌ Error: " + err.message, "error");
-          resetForm();
-        }
-      });
 
-      // ───────────────────────────────────────────────────────────────────────────────
-      // 10) Auto-fill filename based on Vimeo URL if left blank
-      // ───────────────────────────────────────────────────────────────────────────────
-      vimeoUrlInput.addEventListener("input", () => {
-        const url = vimeoUrlInput.value.trim();
-        const match = url.match(/\/(\d+)(?:$|[/?])/);
-        if (match && !filenameInput.value) {
-          filenameInput.value = `video_${match[1]}`;
-        }
+          downloadBtn.disabled = true;
+          downloadBtnText.innerHTML = '<span class="loader"></span> Starting…';
+          showStatus("🟢 Download initiated…", "info");
+
+          try {
+            // Ensure WebSocket is connected
+            if (!ws || ws.readyState === WebSocket.CLOSED) {
+              connectWebSocket();
+            }
+
+            const response = await axios.post("/api/download", {
+              vimeoUrl,
+            });
+            if (response.status === 200) {
+              showStatus(
+                "🚀 Server has started processing your request.",
+                "info"
+              );
+            } else {
+              throw new Error("Server error: " + response.statusText);
+            }
+          } catch (err) {
+            console.error("🔴 /api/download error:", err);
+            showStatus(
+              "❌ " + (err.response?.data?.error || err.message),
+              "error"
+            );
+            resetUI();
+          }
+        });
+
+        // Kick off the first WebSocket connection
+        connectWebSocket();
       });
     </script>
   </body>
