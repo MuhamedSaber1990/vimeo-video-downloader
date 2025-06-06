@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Local video downloads
+downloads/
+
+# Google Drive OAuth tokens
+google_drive_tokens.json
+
+# Environment files
+.env
+
+# Self-signed SSL certs (if you generated any)
+ssl/
+
+# Editor / OS files
+.DS_Store
+npm-debug.log*
