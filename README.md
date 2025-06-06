@@ -75,11 +75,6 @@ This project allows users to enter a Vimeo video URL, download the video via FFm
 
      By default, listens on `http://localhost:3000`.
 
-   - **Local HTTPS (self-signed cert)**
-     ```bash
-     sudo node server.js
-     ```
-     Listens on `https://localhost:443`. Accept the “Not Secure” warning.
 
 2. **Authenticate with Google Drive**
 
