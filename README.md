@@ -16,8 +16,6 @@ This project allows users to enter a Vimeo video URL, download the video via FFm
 ## Repository Structure
 
 ```
-├── ssl/                        # (Optional) Self-signed certificate files (key.pem, cert.pem)
-├── sslip.io                    # Nginx config if using sslip.io (not committed)
 ├── downloads/                  # Local folder for downloaded MP4s (ignored via .gitignore)
 ├── public/                     # Frontend assets
 │   ├── index.html              # Main HTML (split into separate CSS/JS in this repo)
