@@ -4,8 +4,6 @@
 
 This project allows users to enter a Vimeo video URL, download the video via FFmpeg, and automatically upload it to a specified Google Drive folder. Progress updates are displayed in real-time via WebSocket.
 
-## test-link
-output test for the project: http://84.32.188.34:3000/
 
 ## Features
 
